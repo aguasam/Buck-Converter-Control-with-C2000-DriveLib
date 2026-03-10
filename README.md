@@ -6,6 +6,7 @@ This repository contains the implementation of a DC-DC Buck converter control sy
 The project is divided into two main source files:
 1.  **Open Loop (`malha_aberta.c`):** Used for hardware validation, sensor calibration, and PWM modulation testing with a fixed or manually adjustable duty cycle via the Code Composer Studio (CCS) Expressions window.
 2.  **Closed Loop (`malha_fechada.c`):** Implementation of a real-time discrete Proportional-Integral (PI) controller for output voltage regulation.
+3.  **Advanced Instrumentation (`twa_ADCS_example.c`):** Demonstrates simultaneous sampling using multiple ADC modules for precise power calculations.
 
 ## 🛠️ Technical Specifications
 * **MCU:** TMS320F280049C (C2000™ 32-bit Real-Time MCU)
@@ -33,6 +34,12 @@ Key DriveLib functions used for `EPWM1` configuration:
 The system uses **ADCA** (Channel 0) to monitor the feedback voltage. The configuration follows the guidelines from the `ADC.pdf` manual:
 * `ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN0, 15)`: Configures SOC0 to sample channel A0, triggered by ePWM1, with a sample-and-hold window of 15 cycles.
 * `ADC_setInterruptSource(ADCA_BASE, ADC_INT_NUMBER1, ADC_SOC_NUMBER0)`: Links the end of SOC0 conversion to the main system interrupt.
+
+### 3. ADC Submodule & Dual-Sampling Logic
+For instrumentation, we utilize **ADCA** (Voltage) and **ADCB** (Current) to perform **Simultaneous Sampling**. This eliminates the phase shift error between V and I readings.
+* **Synchronized Triggering:** Both `ADCA` and `ADCB` are linked to the same `EPWM1_SOCA` hardware trigger.
+* **SOC Setup:** SOC0 on both modules samples at the exact same nanosecond.
+* **Acquisition Window:** Configured to 15 cycles to ensure proper S+H capacitor charging.
 
 ---
 
